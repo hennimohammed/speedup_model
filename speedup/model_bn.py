@@ -11,42 +11,30 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 e = 0.05
 
 class Model_BN(nn.Module):
-    def __init__(self, input_size, output_size):
+    def __init__(self, input_size, output_size, hidden_sizes=[10, 10, 10]):
         super().__init__()
-        
-        hidden2_size = int(input_size / 2)
-        hidden1_size = int((input_size + hidden2_size) * 3 / 2)
-        hidden3_size = int((output_size + hidden2_size) * 3 / 2)
-        
-        self.hidden1 = nn.Linear(input_size, hidden1_size, bias=False)
-        self.hidden1_bn = nn.BatchNorm1d(hidden1_size)
+        hidden_sizes = [input_size] + hidden_sizes
 
-        self.hidden2 = nn.Linear(hidden1_size, hidden2_size, bias=False)
-        self.hidden2_bn = nn.BatchNorm1d(hidden2_size)
+        self.hidden_layers = []
+        self.batch_norm_layers = []
 
-        self.hidden3 = nn.Linear(hidden2_size, hidden3_size, bias=False)
-        self.hidden3_bn = nn.BatchNorm1d(hidden3_size)
+        for i in range(len(hidden_sizes)-1):
+            self.hidden_layers.append(nn.Linear(hidden_sizes[i], hidden_sizes[i+1], bias=False))
+            self.batch_norm_layers.append(nn.BatchNorm1d(hidden_sizes[i+1]))
+            nn.init.xavier_uniform_(self.hidden_layers[i])
 
-        nn.init.xavier_uniform_(self.hidden1.weight)
-        nn.init.xavier_uniform_(self.hidden2.weight)
-        nn.init.xavier_uniform_(self.hidden3.weight)
 
-        self.predict = nn.Linear(hidden3_size, output_size)
+        self.predict = nn.Linear(hidden_sizes[-1], output_size)
         nn.init.xavier_uniform_(self.predict.weight)
         
         
 
     def forward(self, x):
-        
-        x = F.relu(self.hidden1_bn(self.hidden1(x)))
 
-        x = F.relu(self.hidden2_bn(self.hidden2(x)))
+        for i in range(len(self.hidden_layers)):
+            x = F.relu(self.batch_norm_layers[i](self.hidden_layers[i](x)))
 
-        x = F.relu(self.hidden3_bn(self.hidden3(x)))
-        
         x = self.predict(x)
-        #x = F.relu(self.predict(x))
-        
         return x
     
     
