@@ -15,8 +15,8 @@ class Model_BN(nn.Module):
         super().__init__()
         hidden_sizes = [input_size] + hidden_sizes
 
-        self.hidden_layers = []
-        self.batch_norm_layers = []
+        self.hidden_layers = nn.ModuleList()
+        self.batch_norm_layers = nn.ModuleList()
 
         for i in range(len(hidden_sizes)-1):
             self.hidden_layers.append(nn.Linear(hidden_sizes[i], hidden_sizes[i+1], bias=False))
