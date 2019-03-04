@@ -21,7 +21,7 @@ class Model_BN(nn.Module):
         for i in range(len(hidden_sizes)-1):
             self.hidden_layers.append(nn.Linear(hidden_sizes[i], hidden_sizes[i+1], bias=False))
             self.batch_norm_layers.append(nn.BatchNorm1d(hidden_sizes[i+1]))
-            nn.init.xavier_uniform_(self.hidden_layers[i])
+            nn.init.xavier_uniform_(self.hidden_layers[i].weight)
 
 
         self.predict = nn.Linear(hidden_sizes[-1], output_size)
