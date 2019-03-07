@@ -14,7 +14,10 @@ class DatasetFromHdf5(data.Dataset):
         
         self.schedules = self.f.get('schedules')
         self.programs = self.f.get('programs')
-        self.speedups = self.f.get('times')
+        self.speedups = self.f.get('speedup')
+        self.times = self.f.get('times')
+        self.prog_names = self.f.get('programs_names')
+        self.sched_names = self.f.get('schedules_names')
 
         self.X = np.concatenate((np.array(self.programs), np.array(self.schedules)), axis=1).astype('float32')
         self.Y = np.array(self.speedups, dtype='float32').reshape(-1, 1)
@@ -29,6 +32,12 @@ class DatasetFromHdf5(data.Dataset):
 
     def __getitem__(self, index):
         return self.X[index], self.Y[index]
+
+    def get_prog_name(self, index):
+        return self.prog_names[index]
+    
+    def get_sched_name(self, index):
+        return self.sched_names[index]
 
     def normalize_min_max(self, data):
         data = np.array(data)

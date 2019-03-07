@@ -327,8 +327,8 @@ class Stats():
         schedules_array = []
         exec_times_array = []
 
-
-        for program in self.get_all_programs():
+        programs = sorted(self.get_all_programs())
+        for program in programs:
 
             prog_ast = self.program_to_ast(program)
             progs_array.append(prog_ast)

@@ -14,7 +14,7 @@ def data_to_h5(programs, schedules, exec_times, filename="speedup_dataset.h5"):
     n_cols_scheds = len(schedules[0][0].__array__())
 
     #get data
-    programs_array, schedules_array, times_array = get_speedup_data(programs, schedules, exec_times)
+    programs_array, schedules_array, speedup_array, times_array, prog_names, sched_names = get_speedup_data(programs, schedules, exec_times)
 
     assert programs_array.shape[0] ==  schedules_array.shape[0]
     assert schedules_array.shape[0] == times_array.shape[0]
@@ -25,8 +25,11 @@ def data_to_h5(programs, schedules, exec_times, filename="speedup_dataset.h5"):
     f.create_dataset('programs', data=programs_array, dtype="int32")
     f.create_dataset('schedules', data=schedules_array, dtype="int16") 
     f.create_dataset('times', data=times_array) 
-
+    f.create_dataset('speedup', data=speedup_array)
+    f.create_dataset('programs_names', data=prog_names)
+    f.create_dataset('schedules_names', data=sched_names)
     f.close()
+
 
 
 def get_speedup_data(programs, schedules, exec_times):
@@ -34,30 +37,38 @@ def get_speedup_data(programs, schedules, exec_times):
     assert len(programs) == len(schedules) 
     assert len(schedules) == len(exec_times)
 
-    programs_array = np.array([np.array(program) for program in programs])
-
+   
+    prog_names = []
     schedules_array = []
+    sched_names = []
     times_array = []
     duplicated_programs = []
+    exec_times_array = []
 
-    for i in range(len(programs_array)):
+    for i in range(len(programs)):
         assert "no_schedule" in schedules[i][0].name 
 
         for j in range(len(schedules[i])):
-            duplicated_programs.append(programs_array[i])
+            duplicated_programs.append(np.array(programs[i]))
             schedules_array.append(np.array(schedules[i][j]))
+            sched_names.append(schedules[i][j].name)
+            prog_names.append(programs[i].name)
 
             speedup = exec_times[i][0] / exec_times[i][j] 
             times_array.append(speedup)
+            exec_times_array.append(exec_times[i][j])
 
 
 
     schedules_array = np.array(schedules_array)
     times_array = np.array(times_array)
+    exec_times_array = np.array(exec_times_array)
     duplicated_programs = np.array(duplicated_programs)
+    prog_names = np.array(prog_names, dtype=h5py.special_dtype(vlen=str))
+    sched_names = np.array(sched_names, dtype=h5py.special_dtype(vlen=str))
 
 
-    return (duplicated_programs, schedules_array, times_array)
+    return (duplicated_programs, schedules_array, times_array, exec_times_array, prog_names, sched_names)
 
 
 def get_data(programs, schedules, exec_times):
