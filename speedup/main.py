@@ -76,6 +76,7 @@ def main(batch_size=2048, num_epochs=400,
 
 
 
+
 if __name__ == '__main__':
     Fire()
 
