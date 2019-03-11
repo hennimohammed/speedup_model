@@ -6,7 +6,7 @@ import numpy as np
 
 class DatasetFromHdf5(data.Dataset):
 
-    def __init__(self, filename, normalized=True, maxsize=30000):
+    def __init__(self, filename, normalized=True, log=False, maxsize=30000):
         super().__init__()
 
         self.maxsize = maxsize
@@ -21,6 +21,9 @@ class DatasetFromHdf5(data.Dataset):
 
         self.X = np.concatenate((np.array(self.programs), np.array(self.schedules)), axis=1).astype('float32')
         self.Y = np.array(self.speedups, dtype='float32').reshape(-1, 1)
+
+        if log:
+            self.Y = np.log(self.Y)
         
         
     def __len__(self):
