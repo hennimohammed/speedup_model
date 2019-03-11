@@ -24,7 +24,10 @@ class DatasetFromHdf5(data.Dataset):
 
         if log:
             self.Y = np.log(self.Y)
-            self.Y = (self.Y - np.mean(self.Y))/np.std(self.Y)
+            self.mean = np.mean(self.Y)
+            self.std = np.std(self.Y)
+
+            self.Y = (self.Y - self.mean)/self.std
         
         
     def __len__(self):
