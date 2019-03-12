@@ -10,8 +10,8 @@ import numpy as np
 from functools import reduce
 from tqdm import tqdm
 
-from loop_ast import *
-from schedule import *
+from src.data.loop_ast import *
+from src.data.schedule import *
 
 class Stats():
     def __init__(self, data_path, programs_folder="programs", stats_folder="stats"):

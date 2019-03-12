@@ -1,8 +1,9 @@
-from stats import Stats
+
 import numpy as np 
 from itertools import permutations
 from tqdm import tqdm 
 import h5py
+import dill as pickle
 
 
 def data_to_h5(programs, schedules, exec_times, filename="speedup_dataset.h5"):
@@ -112,13 +113,49 @@ def get_data(programs, schedules, exec_times):
     return (programs_array, indexes_array, schedules_array, times_array)
 
 
+def serialize(programs, schedules, exec_times, filename='speedup_dataset.pkl'):
+
+    assert len(programs) == len(schedules) 
+    assert len(schedules) == len(exec_times)
+
+    speedup_array = []
+    duplicated_programs = []
+    exec_times_array = []
+
+    for i in tqdm(range(len(programs))):
+        assert "no_schedule" in schedules[i][0].name 
+
+        for j in range(len(schedules[i])):
+            #apply schedule to program
+            p = programs[i].apply_schedule(schedules[i][j])
+
+            duplicated_programs.append(p)
+
+            speedup = exec_times[i][0] / exec_times[i][j] 
+            speedup_array.append(speedup)
+            exec_times_array.append(exec_times[i][j])
+
+
+    save  = {'programs':duplicated_programs, 'exec_times':exec_times_array, 'speedup': speedup_array}
+
+    f = open(filename, 'wb')
+
+    pickle.dump(save, f)
+
+    f.close()
+
+
+
+
+
 if __name__=='__main__':
-    st = Stats('../data/')
+    st = Stats('../../data/training_data/')
 
     print("loading data")
     programs, schedules, exec_times = st.load_data()
     print("data loaded")
     print("calculating model input")
-    data_to_h5(programs, schedules, exec_times)
+    #data_to_h5(programs, schedules, exec_times)
+    serialize(programs, schedules, exec_times)
     print("done")
     

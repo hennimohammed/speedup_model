@@ -3,6 +3,9 @@ import torch
 import h5py 
 from bisect import bisect_right
 import numpy as np
+from src.data import load_data
+import src.data.stats as stats
+import dill
 
 class DatasetFromHdf5(data.Dataset):
 
@@ -77,4 +80,54 @@ class DatasetFromHdf5(data.Dataset):
 
     
        
+class DatasetFromPkl(data.Dataset):
+    def __init__(self, filename, normalized=False, log=False, maxsize=100000):
+        super().__init__()
+
+        self.maxsize = maxsize
         
+        #read dataset
+        f = open(filename, 'rb')
+        dataset_dict = dill.load(f)
+        f.close()
+
+        self.programs = dataset_dict['programs']
+        self.exec_times = dataset_dict['exec_times']
+        self.speedups = dataset_dict['speedup']
+
+        programs, schedules = zip(*[(program.__array__(), program.schedule.__array__())
+                            for program in self.programs])
+       
+        self.X = np.concatenate((np.array(programs), np.array(schedules)), axis=1).astype('float32')
+        self.Y = np.array(self.speedups, dtype='float32').reshape(-1, 1)
+
+        if log:
+            self.Y = np.log(self.Y)
+            self.mean = np.mean(self.Y)
+            self.std = np.std(self.Y)
+
+            self.Y = (self.Y - self.mean)/self.std
+
+    def __getitem__(self, index):
+        return self.X[index], self.Y[index] 
+
+    def __len__(self):
+        if self.maxsize is None:
+            return len(self.Y)
+
+        return self.maxsize
+
+
+
+
+
+    def pickle_data(self, data_path='data/training_data/', dataset_path='data/speedup_dataset.pkl'):
+        st = stats.Stats(data_path)
+
+        print("Reading data")
+        programs, schedules, exec_times = st.load_data()
+        print("data loaded")
+        print("Serializing")
+        load_data.serialize(programs, schedules, exec_times, filename=dataset_path)
+        print("done")
+

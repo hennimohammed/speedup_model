@@ -171,14 +171,18 @@ class Loop():
 
 class Loop_AST():
 
-    def __init__(self, name, dict_repr=None):
+    def __init__(self, name, dict_repr=None, schedule=None):
 
         self.name = name
         self.root_loop = None
         self.dtype_int_dict = {"p_int": 199}
+        self.dict_repr = dict_repr
         self.load_from_dict(dict_repr)
+        self.schedule = schedule
 
-
+    def apply_schedule(self, schedule):
+        
+        return Loop_AST(self.name, self.dict_repr, schedule)
     
     def dtype_to_int(self, dtype):
         return self.dtype_int_dict[dtype]
