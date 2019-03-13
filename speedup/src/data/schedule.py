@@ -12,6 +12,7 @@ class Schedule():
         
         self.load_schedules(dict_repr)
 
+
     def add_interchange(self, interchange):
         if interchange:
             self.schedule_list.append({
@@ -76,7 +77,17 @@ class Schedule():
         
         unrolling_factor = dict_repr['unrolling_factor']
         self.add_unrolling(unrolling_factor)
-    
+
+        self.binary_repr = (+(len(interchange) > 0), +(tiling is not None), +(unrolling_factor is not None))
+
+    def __eq__(self, other, binary=True):
+
+        if self.binary_repr == other.binary_repr:
+            if not binary:
+                return self.schedule_list == other.schedule_list
+
+            return True
+        return False
     def __array__(self):
 
         arr = []

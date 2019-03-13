@@ -119,24 +119,28 @@ def serialize(programs, schedules, exec_times, filename='speedup_dataset.pkl'):
     assert len(schedules) == len(exec_times)
 
     speedup_array = []
-    duplicated_programs = []
+    program_indexes = []
+    schedules_array = []
     exec_times_array = []
+
 
     for i in tqdm(range(len(programs))):
         assert "no_schedule" in schedules[i][0].name 
 
         for j in range(len(schedules[i])):
-            #apply schedule to program
-            p = programs[i].apply_schedule(schedules[i][j])
+            
+            #p = programs[i].apply_schedule(schedules[i][j])
 
-            duplicated_programs.append(p)
+            program_indexes.append(i)
+            schedules_array.append(schedules[i][j])
 
             speedup = exec_times[i][0] / exec_times[i][j] 
             speedup_array.append(speedup)
             exec_times_array.append(exec_times[i][j])
 
 
-    save  = {'programs':duplicated_programs, 'exec_times':exec_times_array, 'speedup': speedup_array}
+    save  = {'programs':programs, 'program_indexes':program_indexes,
+             'schedules':schedules_array, 'exec_times':exec_times_array, 'speedup': speedup_array}
 
     f = open(filename, 'wb')
 

@@ -85,6 +85,7 @@ class DatasetFromPkl(data.Dataset):
         super().__init__()
 
         self.maxsize = maxsize
+        self.dataset = filename
         
         #read dataset
         f = open(filename, 'rb')
@@ -92,13 +93,15 @@ class DatasetFromPkl(data.Dataset):
         f.close()
 
         self.programs = dataset_dict['programs']
+        self.program_indexes = dataset_dict['program_indexes']
+        self.schedules = dataset_dict['schedules']
         self.exec_times = dataset_dict['exec_times']
         self.speedups = dataset_dict['speedup']
 
-        programs, schedules = zip(*[(program.__array__(), program.schedule.__array__())
-                            for program in self.programs])
+        programs = [program.__array__() for program in self.programs]
+        schedules = [schedule.__array__() for schedule in self.schedules]
        
-        self.X = np.concatenate((np.array(programs), np.array(schedules)), axis=1).astype('float32')
+        self.X = np.concatenate((np.array(programs)[self.program_indexes], np.array(schedules)), axis=1).astype('float32')
         self.Y = np.array(self.speedups, dtype='float32').reshape(-1, 1)
 
         if log:
@@ -108,6 +111,7 @@ class DatasetFromPkl(data.Dataset):
 
             self.Y = (self.Y - self.mean)/self.std
 
+        
     def __getitem__(self, index):
         return self.X[index], self.Y[index] 
 
@@ -116,6 +120,8 @@ class DatasetFromPkl(data.Dataset):
             return len(self.Y)
 
         return self.maxsize
+
+    def 
 
 
 
