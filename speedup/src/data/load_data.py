@@ -124,13 +124,12 @@ def serialize(programs, schedules, exec_times, filename='speedup_dataset.pkl'):
     exec_times_array = []
 
 
-    for i in tqdm(range(len(programs))):
+
+    for i in tqdm(np.random.RandomState(seed=42).permutation(range(len(programs)))):
         assert "no_schedule" in schedules[i][0].name 
 
         for j in range(len(schedules[i])):
             
-            #p = programs[i].apply_schedule(schedules[i][j])
-
             program_indexes.append(i)
             schedules_array.append(schedules[i][j])
 
