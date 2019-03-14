@@ -14,7 +14,7 @@ from src.data.loop_ast import *
 from src.data.schedule import *
 
 class Stats():
-    def __init__(self, data_path, programs_folder="programs", stats_folder="stats"):
+    def __init__(self, data_path, programs_folder="programs", stats_folder="programs"):
 
         #self.tiramisu_root = tiramisu_root +'/'
         self.data_path = data_path+'/'
@@ -307,10 +307,14 @@ class Stats():
         with open(full_path + '/'+program + '/' + schedule +'/exec_times.txt', 'r') as f:
 
             exec_times = f.readlines()
-
+            
             if len(exec_times) > 0:
                 r = re.compile(r"[0-9]+(.[0-9]+)?(e\+[0-9]+)?") 
-                exec_times = np.array([float(r.match(value).group(0)) for value in exec_times], dtype="float64")
+                
+                exec_times = [r.match(value) for value in exec_times]
+
+                exec_times = np.array([val.group(0) for val in exec_times
+                                if val is not None], dtype='float64')
                 
                 exec_time = np.median(exec_times)/1000
                 
