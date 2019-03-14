@@ -125,8 +125,8 @@ class DatasetFromPkl(data.Dataset):
 
 
 
-
-    def pickle_data(self, data_path='data/training_data/', dataset_path='data/speedup_dataset.pkl'):
+    @staticmethod
+    def pickle_data(data_path='data/training_data/', dataset_path='data/speedup_dataset.pkl'):
         st = stats.Stats(data_path)
 
         print("Reading data")
