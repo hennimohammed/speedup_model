@@ -220,6 +220,7 @@ class Loop_AST():
 
     
     def apply_schedule(self):
+        self.name = self.schedule.name 
         binary_schedule = self.schedule.binary_repr
 
         for command in self.schedule:

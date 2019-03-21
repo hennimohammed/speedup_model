@@ -78,9 +78,72 @@ class DatasetFromHdf5(data.Dataset):
         self.f.close()
         self.__init__(filename)
 
-    
-       
 class DatasetFromPkl(data.Dataset):
+    def __init__(self, filename, normalized=False, log=False, maxsize=100000):
+        super().__init__()
+
+        self.maxsize = maxsize
+        self.dataset = filename
+        
+        #read dataset
+        f = open(filename, 'rb')
+        dataset_dict = dill.load(f)
+        f.close()
+
+        self.programs = dataset_dict['programs']
+        self.program_indexes = dataset_dict['program_indexes']
+        self.schedules = dataset_dict['schedules']
+        self.exec_times = dataset_dict['exec_times']
+        self.speedups = dataset_dict['speedup']
+
+        
+        self.X = []
+        for i in range(len(self.schedules)):
+            program = self.programs[self.program_indexes[i]]
+
+            self.X.append(program.apply_schedule(self.schedules[i]).__array__())
+
+
+        self.X = np.array(self.X).astype('float32')
+        self.Y = np.array(self.speedups, dtype='float32').reshape(-1, 1)
+
+
+
+        if log:
+            self.Y = np.log(self.Y)
+            
+            self.mean = np.mean(self.Y)
+            self.std = np.std(self.Y)
+
+            self.Y = (self.Y - self.mean)/self.std
+
+        
+    def __getitem__(self, index):
+        return self.X[index], self.Y[index] 
+
+    def __len__(self):
+        if self.maxsize is None:
+            return len(self.Y)
+
+        return self.maxsize
+
+   
+
+
+
+    @staticmethod
+    def pickle_data(data_path='data/training_data/', dataset_path='data/speedup_dataset.pkl'):
+        st = stats.Stats(data_path)
+
+        print("Reading data")
+        programs, schedules, exec_times = st.load_data()
+        print("data loaded")
+        print("Serializing")
+        load_data.serialize(programs, schedules, exec_times, filename=dataset_path)
+        print("done")
+   
+       
+class DatasetFromPkl_old(data.Dataset):
     def __init__(self, filename, normalized=False, log=False, maxsize=100000):
         super().__init__()
 
