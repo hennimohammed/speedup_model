@@ -229,7 +229,7 @@ class Loop_AST():
             params = command['params']
             factors = command['factors']
 
-            if type_ == 'tile' and binary_schedule[1] == 1:
+            if type_ == 'tiling' and binary_schedule[1] == 1:
                 for loop_id, factor in zip(params, factors):
                     self.tile(loop_id, factor)
             
@@ -237,7 +237,7 @@ class Loop_AST():
                 self.interchange(params[0])
                 self.interchange(params[1])
 
-            elif type_ == 'unroll' and binary_schedule[2] == 1:
+            elif type_ == 'unrolling' and binary_schedule[2] == 1:
                 self.unroll(factors[0])
 
     def unroll(self, factor):
