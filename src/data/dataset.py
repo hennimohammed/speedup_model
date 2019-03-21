@@ -101,7 +101,7 @@ class DatasetFromPkl(data.Dataset):
         for i in range(len(self.schedules)):
             program = self.programs[self.program_indexes[i]]
 
-            self.X.append(program.apply_schedule(self.schedules[i]).__array__())
+            self.X.append(program.add_schedule(self.schedules[i]).__array__())
 
 
         self.X = np.array(self.X).astype('float32')

@@ -1,4 +1,5 @@
 import numpy as np 
+import pprint
 
 class Loop_Iterator():
         def __init__(self, it_id, dict_repr, depth=0):
@@ -223,7 +224,7 @@ class Loop_AST():
         self.name = self.schedule.name 
         binary_schedule = self.schedule.binary_repr
 
-        for command in self.schedule:
+        for command in self.schedule.schedule_list:
             type_ = command['type']
             params = command['params']
             factors = command['factors']
@@ -246,15 +247,18 @@ class Loop_AST():
     def interchange(self, loop_id):
         loop = self.root_loop
 
-        while loop.id != loop_id:
+       
+        while loop.iterator.id != loop_id:
             loop = loop.children[0]
+
+       
         
         loop.interchange() 
 
     def tile(self, loop_id, factor):
         loop = self.root_loop
 
-        while loop.id != loop_id:
+        while loop.iterator.id != loop_id:
             loop = loop.children[0]
 
         loop.tile(factor)
