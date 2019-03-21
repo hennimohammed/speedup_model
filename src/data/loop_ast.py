@@ -13,8 +13,11 @@ class Loop_Iterator():
         def __repr__(self):
             return f"({self.lower_bound}, {self.upper_bound})"
 
-        def __array__(self):
+        def __array__old(self):
             return [self.id, self.lower_bound, self.upper_bound]
+
+        def __array__(self):
+            return [self.lower_bound, self.upper_bound]
 
 class Input():
     def __init__(self, input_id, dict_repr, depth=0):
@@ -67,6 +70,7 @@ class Computation():
         self.id = comp_id
         self.max_children = 17 #max accesses
         self.max_comp_len = 21*self.max_children
+
         #search for comp_i
         computation = next(c for c in dict_repr['computations']['computations_array']
                                 if c['comp_id'] == comp_id)
@@ -97,13 +101,10 @@ class Computation():
     def __array__(self):
         children_arr = []
 
-        for child in self.children[:self.max_children]:
-            inp = child[0]
-            access = child[1]
-
+        for inp, access in self.children[:self.max_children]:
             children_arr.extend(inp.__array__() + access.__array__())
 
-        children_arr.extend([-1] * (self.max_comp_len - len(children_arr)))
+        children_arr.extend([0] * (self.max_comp_len - len(children_arr)))
         
         return children_arr
         
@@ -113,6 +114,12 @@ class Computation():
         
 class Loop():
     def __init__(self, loop_repr, dict_repr, depth=0):
+        self.tiled = False
+        self.tile_factor = 0 
+
+        self.interchanged = False
+
+
         self.depth = depth
         self.id = loop_repr['loop_id']
 
@@ -143,6 +150,13 @@ class Loop():
         #sort children by position 
         return list(list(zip(*sorted(self.children_dict.items(), key=lambda x: int(x[0]))))[1])  
 
+    def tile(self, factor):
+        self.tiled = True
+        self.tile_factor = factor
+    
+    def interchange(self):
+        self.interchanged = True 
+
     def __repr__(self):
         children_repr = [repr(child) for child in self.children]
         children_repr = '\n' + (self.depth+1)*'\t'  + "\n".join(children_repr)
@@ -150,7 +164,7 @@ class Loop():
 
         return  f"Loop {self.id} {repr(self.iterator    )}:" + children_repr
 
-    def __array__(self):
+    def __array__old(self):
         loop_arr = []
         loop_arr.extend(self.iterator.__array__())
 
@@ -164,6 +178,25 @@ class Loop():
 
         return loop_arr
 
+    def __array__(self):
+        arr = []
+        arr.extend(self.iterator.__array__())
+        
+        #loop interchanged
+        arr.extend([+self.interchanged])
+
+        #loop tiled
+        arr.extend([+self.tiled, self.tile_factor])
+
+        if not isinstance(self.children[0], Loop): 
+            #fill loop space with 0
+            loop_arr_len = len(arr)
+            arr.extend([0]*loop_arr_len * (3 - self.depth))
+        
+       
+        arr.extend(self.children[0].__array__())
+
+        return arr
         
         
 
@@ -172,7 +205,6 @@ class Loop():
 class Loop_AST():
 
     def __init__(self, name, dict_repr=None, schedule=None):
-
         self.name = name
         self.root_loop = None
         self.dtype_int_dict = {"p_int": 199}
@@ -180,13 +212,58 @@ class Loop_AST():
         self.load_from_dict(dict_repr)
         self.schedule = schedule
 
-    def apply_schedule(self, schedule):
+        self.unrolled = False
+        self.unroll_factor = 0
+
+        if self.schedule:
+            self.apply_schedule()
+
+    
+    def apply_schedule(self):
+        binary_schedule = self.schedule.binary_repr
+
+        for command in self.schedule:
+            type_ = command['type']
+            params = command['params']
+            factors = command['factors']
+
+            if type_ == 'tile' and binary_schedule[1] == 1:
+                for loop_id, factor in zip(params, factors):
+                    self.tile(loop_id, factor)
+            
+            elif type_ == 'interchange' and binary_schedule[0] == 1:
+                self.interchange(params[0])
+                self.interchange(params[1])
+
+            elif type_ == 'unroll' and binary_schedule[2] == 1:
+                self.unroll(factors[0])
+
+    def unroll(self, factor):
+        self.unrolled = True
+        self.unroll_factor = factor
+
+    def interchange(self, loop_id):
+        loop = self.root_loop
+
+        while loop.id != loop_id:
+            loop = loop.children[0]
+        
+        loop.interchange() 
+
+    def tile(self, loop_id, factor):
+        loop = self.root_loop
+
+        while loop.id != loop_id:
+            loop = loop.children[0]
+
+        loop.tile(factor)
+    
+    def add_schedule(self, schedule):
         
         return Loop_AST(self.name, self.dict_repr, schedule)
     
     def dtype_to_int(self, dtype):
         return self.dtype_int_dict[dtype]
-
 
     def load_from_dict(self, dict_repr):
         if not dict_repr:
@@ -201,5 +278,14 @@ class Loop_AST():
 
         self.root_loop = Loop(root, dict_repr)
 
-    def __array__(self):
+    def __array__old(self):
         return np.array(self.root_loop.__array__())
+
+    def __array__(self):
+
+        arr = self.root_loop.__array__()
+
+        #loop unrolling
+        arr.extend([+self.unrolled, self.unroll_factor])
+
+        return arr

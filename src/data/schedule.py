@@ -9,7 +9,7 @@ class Schedule():
                             'tiling':1,
                             'unrolling':2
                         }
-        
+        self.binary_repr = None
         self.load_schedules(dict_repr)
 
 
