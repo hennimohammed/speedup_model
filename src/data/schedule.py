@@ -32,9 +32,9 @@ class Schedule():
             dims = tiling['tiling_dims']
             factors = tiling['tiling_factors']
 
-            if tiling['tiling_depth'] == 2:
-                dims.append(-1)
-                factors.append(-1)
+            # if tiling['tiling_depth'] == 2:
+            #     dims.append(-1)
+            #     factors.append(-1)
 
             self.schedule_list.append({
                                     'type':'tiling',
