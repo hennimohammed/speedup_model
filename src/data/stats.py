@@ -164,7 +164,11 @@ class Stats():
 
         full_path = self.data_path + self.stats_folder + '/' + program + '/' + program + '.json'
 
-        json_dict = json.load(open(full_path, 'r'))
+        try:
+            json_dict = json.load(open(full_path, 'r'))
+        except Exception:
+            print(program)
+            exit(1)
 
         return json_dict
 

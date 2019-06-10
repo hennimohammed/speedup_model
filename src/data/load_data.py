@@ -47,7 +47,14 @@ def get_speedup_data(programs, schedules, exec_times):
     exec_times_array = []
 
     for i in range(len(programs)):
-        assert "no_schedule" in schedules[i][0].name 
+        
+        try:
+            
+            assert "no_schedule" in schedules[i][0].name 
+        except AssertionError:
+            print(schedules[i][0].name)
+            exit(1)
+   
 
         for j in range(len(schedules[i])):
             duplicated_programs.append(np.array(programs[i]))
@@ -122,11 +129,16 @@ def serialize(programs, schedules, exec_times, filename='speedup_dataset.pkl'):
     program_indexes = []
     schedules_array = []
     exec_times_array = []
-
-
-
+    
     for i in tqdm(np.random.RandomState(seed=42).permutation(range(len(programs)))):
-        assert "no_schedule" in schedules[i][0].name 
+        #try:
+        #    assert "no_schedule" in schedules[i][0].name 
+         
+       # except AssertionError:
+       #     print(schedules[i][0].name)
+       #     exit(1)
+        if "no_schedule" not in schedules[i][0].name:
+            continue
 
         for j in range(len(schedules[i])):
             

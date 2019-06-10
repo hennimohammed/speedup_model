@@ -257,11 +257,19 @@ class Loop_AST():
 
     def tile(self, loop_id, factor):
         loop = self.root_loop
-        
-        while loop.iterator.id != loop_id:
-            loop = loop.children[0]
+        try:
+            while loop.iterator.id != loop_id:
+                loop = loop.children[0]
+         
 
-        loop.tile(factor)
+            loop.tile(factor)
+        except AttributeError:
+            print(self.name)
+            print(loop_id)
+            print(self.root_loop)
+            from pprint import pprint
+            pprint(self.dict_repr)
+            exit(1)
      
     def add_schedule(self, schedule):
         
