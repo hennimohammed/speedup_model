@@ -30,5 +30,5 @@ class Model_BN(nn.Module):
             x = self.dropouts[i](F.relu(self.batch_norm_layers[i](self.hidden_layers[i](x))))
 
         x = self.predict(x)
-        return x
+        return F.relu(x)
     
