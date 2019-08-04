@@ -105,13 +105,13 @@ class DatasetFromPkl(data.Dataset):
       
             program = self.programs[self.program_indexes[i]]
             
-            prog_num = int(program.name[len("function"):])
+           # prog_num = int(program.name[len("function"):])
             
-            if prog_num <= 600 or (115000 <= prog_num <= 121200):
-                self.X.append(program.add_schedule(self.schedules[i]).__array__())
-                self.Y.append(self.speedups[i])
-                self.restricted_program_indexes.append(self.program_indexes[i])
-                self.restricted_schedules.append(self.schedules[i])
+           # if prog_num <= 6i00 or (115000 <= prog_num <= 121200):
+            self.X.append(program.add_schedule(self.schedules[i]).__array__())
+            self.Y.append(self.speedups[i])
+            self.restricted_program_indexes.append(self.program_indexes[i])
+            self.restricted_schedules.append(self.schedules[i])
 
 
         self.X = np.array(self.X).astype('float32')

@@ -88,6 +88,37 @@ class Stats():
                 self.exec_command("touch " +self.data_path + self.stats_folder \
                                     + '/' + program + '/' + schedule + '/exec_times.txt')
 
+    def read_times(self):
+        full_path = self.data_path + self.stats_folder + '/'
+
+        results = {}
+        for program,schedule in self.get_all_programs_schedules():
+            exec_times = np.array(self.read_exec_times(program, schedule), dtype='float64')
+
+            results[(program, schedule)] = {
+                                                'Min': min(exec_times),
+                                                'Max': max(exec_times),
+                                                'Mean': np.mean(exec_times),
+                                                'Median': np.median(exec_times),
+                                                'Std': np.std(exec_times),
+                                                'N_samples':len(exec_times)
+
+                                            }
+
+        keys, vals = list(zip(*results.items()))
+
+        index = pd.MultiIndex.from_tuples(keys, names=("program", "schedule"))
+        
+
+        
+        return pd.DataFrame(list(vals), index=index)
+        
+
+        
+
+        
+
+
     def read_results(self):
         results = {}
         full_path = self.data_path + self.stats_folder + '/'
@@ -325,6 +356,20 @@ class Stats():
             f.close()
 
         return exec_time
+
+    def read_exec_times(self, program, schedule):
+        full_path = self.data_path + self.stats_folder + '/'
+
+        exec_times = []
+        #Getting the execution time of the schedule
+        with open(full_path + '/'+program + '/' + schedule +'/exec_times.txt', 'r') as f:
+
+            exec_times = f.readlines()
+            
+            f.close()
+
+        return exec_times
+
 
     def load_data(self):
         '''
