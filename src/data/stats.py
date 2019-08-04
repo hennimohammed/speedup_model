@@ -366,6 +366,7 @@ class Stats():
 
             exec_times = f.readlines()
             r = re.compile(r"[0-9]+(.[0-9]+)?(e\+[0-9]+)?")
+            exec_times = [r.match(value) for value in exec_times]
             exec_times = np.array([val.group(0) for val in exec_times
                                 if val is not None], dtype='float64')
             
