@@ -103,7 +103,8 @@ class Stats():
                                                 'Mean': np.mean(exec_times),
                                                 'Median': np.median(exec_times),
                                                 'Std': np.std(exec_times),
-                                                'N_samples':len(exec_times)
+                                                'N_samples':len(exec_times),
+                                                'Times':exec_times
 
                                             }
 
