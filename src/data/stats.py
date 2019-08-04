@@ -92,9 +92,8 @@ class Stats():
         full_path = self.data_path + self.stats_folder + '/'
 
         results = {}
-        programs_schedules = list(self.get_all_programs_schedules())
-
-        for program,schedule in tqdm(programs_schedules):
+       
+        for program,schedule in tqdm(self.get_all_programs_schedules(), total=1277934):
             exec_times = np.array(self.read_exec_times(program, schedule), dtype='float64')
 
             results[(program, schedule)] = {
