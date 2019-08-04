@@ -365,6 +365,9 @@ class Stats():
         with open(full_path + '/'+program + '/' + schedule +'/exec_times.txt', 'r') as f:
 
             exec_times = f.readlines()
+            r = re.compile(r"[0-9]+(.[0-9]+)?(e\+[0-9]+)?")
+            exec_times = np.array([val.group(0) for val in exec_times
+                                if val is not None], dtype='float64')
             
             f.close()
 
